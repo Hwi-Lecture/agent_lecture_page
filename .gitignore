@@ -7,3 +7,4 @@ node_modules/
 !.env.example
 .DS_Store
 Thumbs.db
+교안구상.md
