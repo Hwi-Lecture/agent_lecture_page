@@ -1,0 +1,19 @@
+:root { font: 14px/1.55 system-ui, sans-serif; color: #202747; background: #f7f8fc; }
+* { box-sizing: border-box; }
+body { margin: 0; padding: 1rem; }
+h1 { font-size: 1.1rem; margin: 0; }
+h2 { font-size: 1rem; margin: 0 0 .5rem; }
+p { color: #58617b; margin: .4rem 0 .8rem; }
+label { display: block; font-weight: 700; margin: .8rem 0 .3rem; font-size: .85rem; }
+input, textarea, button { width: 100%; border: 1px solid #d7dced; border-radius: .6rem; padding: .65rem; font: inherit; color: inherit; background: white; }
+textarea { min-height: 5rem; resize: vertical; }
+button { cursor: pointer; background: #4354c8; border-color: #4354c8; color: white; font-weight: 700; }
+button:hover { background: #3443ad; }
+.actions { display: flex; gap: .5rem; margin: .7rem 0; }
+.actions button { flex: 1; }
+.secondary { background: white; color: #3548b8; }
+.secondary:hover { background: #edf0ff; }
+.panel { background: white; padding: 1rem; border: 1px solid #dfe4f2; border-radius: .75rem; margin: 1rem 0; }
+.note, .status { font-size: .8rem; }
+.status { min-height: 1.4em; }
+

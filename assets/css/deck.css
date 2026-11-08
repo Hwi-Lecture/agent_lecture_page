@@ -1,0 +1,152 @@
+/* =========================================================
+   deck.css — 슬라이드·실습 분할·슬라이드 목차 (담당: Claude)
+   슬라이드는 컨테이너 쿼리로 크기에 맞춰 16:9 유지 → JS 스케일 계산 불필요
+   슬라이드 안 글자 크기는 cqi(슬라이드 폭 기준) 단위라 축소 시에도 비율 유지
+   ========================================================= */
+
+.deck-view { --split: .55; flex: 1; min-height: 0; display: flex; background: var(--c-surface-2); }
+.deck-pane { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+/* ---------- 슬라이드 무대 ---------- */
+.deck {
+  position: relative; flex: 1; min-height: 0; margin: var(--sp-4);
+  container-type: size; display: grid; place-items: center;
+}
+.slide {
+  position: relative; grid-area: 1 / 1; width: min(100cqw, 100cqh * 16 / 9); aspect-ratio: 16 / 9;
+  container-type: inline-size; overflow: hidden;
+  background: var(--c-surface); border-radius: var(--radius); box-shadow: var(--shadow);
+  visibility: hidden; opacity: 0; transition: opacity .25s var(--ease), visibility .25s;
+}
+.slide.is-active { visibility: visible; opacity: 1; }
+
+/* 슬라이드 내부 타이포 (cqi = 슬라이드 폭의 1%) */
+.slide__body {
+  height: 100%; padding: 6cqi 7cqi; display: flex; flex-direction: column; gap: 2.2cqi;
+  font-size: 2.1cqi; line-height: 1.55;
+  /* 내용이 넘치면 잘리지 않고 슬라이드 안에서 스크롤 (얇은 스크롤바) */
+  overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin;
+}
+.slide__body > * { flex-shrink: 0; }
+.slide h1 { font-size: 5.2cqi; font-weight: 800; letter-spacing: -.02em; }
+.slide h2 { font-size: 3.6cqi; font-weight: 800; letter-spacing: -.015em; }
+.slide h3 { font-size: 2.6cqi; color: var(--c-primary); }
+.slide ul, .slide ol { margin: 0; padding-left: 1.3em; }
+.slide li + li { margin-top: .5em; }
+.slide li::marker { color: var(--c-node); }
+.slide strong { color: var(--c-primary); }
+.slide code { font-family: var(--font-mono); font-size: .9em; padding: .05em .35em; border-radius: 4px; background: var(--c-surface-2); }
+.slide pre { margin: 0; padding: 1.6cqi 2cqi; border-radius: 1cqi; background: #161a33; color: #e6e8f5; font-size: 1.6cqi; overflow: hidden; }
+.slide pre code { background: none; padding: 0; color: inherit; }
+.slide img { max-height: 100%; object-fit: contain; margin: 0 auto; border-radius: .8cqi; }
+.slide table { border-collapse: collapse; font-size: 1.8cqi; }
+.slide th, .slide td { padding: .8cqi 1.4cqi; border-bottom: 1px solid var(--c-line); text-align: left; }
+.slide th { background: var(--c-surface-2); }
+.slide .callout { padding: 1.6cqi 2cqi; border-radius: 1cqi; }
+
+/* 레이아웃: slide--title */
+.slide--title .slide__body { justify-content: center; padding-left: 9cqi; gap: 1.6cqi;
+  background:
+    radial-gradient(circle at 85% 30%, var(--c-primary-2) 0 14cqi, transparent 14.2cqi),
+    radial-gradient(circle at 72% 78%, var(--c-node-2) 0 8cqi, transparent 8.2cqi);
+}
+.slide--title h1 { font-size: 6.4cqi; max-width: 70%; }
+.slide--title p { font-size: 2.4cqi; color: var(--c-ink-2); }
+
+/* 레이아웃: slide--section (단원 내 소제목 장) */
+.slide--section { background: var(--c-primary); }
+.slide--section .slide__body { justify-content: center; color: #fff; }
+.slide--section h2 { font-size: 5.4cqi; }
+.slide--section p { font-size: 2.4cqi; opacity: .8; }
+.slide--section strong { color: inherit; }
+
+/* 레이아웃: slide--two-col (.slide__col 두 개) */
+.slide--two-col .slide__body { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto 1fr; column-gap: 4cqi; }
+.slide--two-col .slide__body > :not(.slide__col) { grid-column: 1 / -1; }
+.slide__col { min-width: 0; display: flex; flex-direction: column; gap: 1.6cqi; }
+
+/* 레이아웃: slide--figure (그림 중심) */
+.slide--figure .slide__body { align-items: center; text-align: center; }
+.slide--figure .slide__body > :is(img, figure, svg, div:not(.callout)) { flex: 1; min-height: 0; }
+.slide--figure figcaption { font-size: 1.7cqi; color: var(--c-ink-3); }
+
+/* 실습 연결된 장 표시 */
+.slide[data-lab]::after {
+  content: "🧪 실습"; position: absolute; top: 2cqi; right: 2.4cqi; padding: .3cqi 1.2cqi;
+  font-size: 1.4cqi; font-weight: 700; border-radius: 99px; background: var(--c-node-2); color: var(--c-node);
+}
+
+/* ---------- 하단 바 ---------- */
+.deck-bar {
+  flex: none; display: flex; align-items: center; gap: var(--sp-2);
+  height: 56px; padding: 0 var(--sp-4); background: var(--c-surface); border-top: 1px solid var(--c-line);
+}
+.deck-bar__count { min-width: 64px; text-align: center; font-size: var(--fs-sm); font-weight: 600; font-variant-numeric: tabular-nums; }
+.deck-bar__progress { flex: 1; margin: 0 var(--sp-3); }
+.deck-bar .btn:disabled { opacity: .35; cursor: default; }
+.lab-btn { background: var(--c-node); border-color: var(--c-node); color: #fff; }
+.lab-btn:hover { border-color: var(--c-node); filter: brightness(1.08); }
+/* 실습이 열린 상태에서 다른 실습 장에 오면 JS가 is-swap을 붙여 "이 실습으로 교체" 버튼으로 표시 */
+.lab-btn.is-swap { background: var(--c-surface); color: var(--c-node); }
+
+/* ---------- 실습 분할 ---------- */
+.split-handle, .lab-pane { display: none; }
+body.is-lab-open .deck-pane   { flex: 0 0 calc(var(--split) * 100%); }
+body.is-lab-open .split-handle {
+  display: block; flex: none; width: 10px; cursor: col-resize; position: relative; background: var(--c-surface-2);
+}
+.split-handle::before {
+  content: ""; position: absolute; inset: 50% auto auto 50%; width: 4px; height: 40px;
+  transform: translate(-50%, -50%); border-radius: 99px; background: var(--c-ink-3); opacity: .5;
+}
+.split-handle:hover::before, .split-handle:focus-visible::before, .split-handle.is-active::before { background: var(--c-primary); opacity: 1; }
+body.is-lab-open .lab-pane {
+  display: flex; flex: 1; min-width: 0; flex-direction: column;
+  background: var(--c-surface); border-left: 1px solid var(--c-line);
+}
+.lab-pane__bar {
+  flex: none; display: flex; align-items: center; gap: var(--sp-2); height: 48px; padding: 0 var(--sp-3);
+  border-bottom: 1px solid var(--c-line);
+}
+.lab-pane__title { font-size: var(--fs-sm); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lab-pane__note { margin-left: auto; font-size: var(--fs-xs); color: var(--c-ink-3); white-space: nowrap; }
+.lab-pane__frame { flex: 1; width: 100%; border: 0; background: var(--c-surface); }
+/* 분할선 드래그 중 iframe이 마우스를 가로채지 않도록 (JS: .split-handle에 is-active) */
+.split-handle.is-active ~ .lab-pane .lab-pane__frame { pointer-events: none; }
+
+/* ---------- 슬라이드 목차 서랍 ---------- */
+.slide-toc {
+  position: absolute; z-index: 30; top: 0; right: 0; bottom: 0; width: min(320px, 90vw);
+  display: flex; flex-direction: column; background: var(--c-surface); border-left: 1px solid var(--c-line); box-shadow: var(--shadow-lg);
+  transform: translateX(100%); visibility: hidden; transition: transform .25s var(--ease), visibility .25s;
+}
+body.is-toc-open .slide-toc { transform: none; visibility: visible; }
+.slide-toc__head { display: flex; align-items: center; justify-content: space-between; padding: var(--sp-3) var(--sp-4); border-bottom: 1px solid var(--c-line); }
+.slide-toc__list { list-style: none; margin: 0; padding: var(--sp-2); overflow-y: auto; }
+.slide-toc__list button {
+  width: 100%; display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-2) var(--sp-3);
+  border: 0; border-radius: var(--radius-sm); background: none; text-align: left; font-size: var(--fs-sm); cursor: pointer;
+}
+.slide-toc__list button:hover { background: var(--c-surface-2); }
+.slide-toc__list button.is-active { background: var(--c-primary-2); color: var(--c-primary); font-weight: 700; }
+.slide-toc__no { min-width: 22px; color: var(--c-ink-3); font-variant-numeric: tabular-nums; }
+.slide-toc__lab { margin-left: auto; }
+.scrim { position: absolute; inset: 0; z-index: 20; background: rgba(16,19,42,.3); opacity: 0; visibility: hidden; transition: opacity .25s, visibility .25s; }
+body.is-toc-open .scrim { opacity: 1; visibility: visible; }
+
+/* ---------- 전체화면 ---------- */
+.deck-view:fullscreen { background: #0c0f22; }
+.deck-view:fullscreen .deck { margin: 0; }
+.deck-view:fullscreen .slide { border-radius: 0; box-shadow: none; }
+
+/* ---------- 좁은 화면: 위아래 분할 ---------- */
+@media (max-width: 900px) {
+  body.is-lab-open .deck-view { flex-direction: column; }
+  body.is-lab-open .deck-pane { flex: 0 0 calc(var(--split) * 100%); min-height: 0; }
+  body.is-lab-open .split-handle { width: auto; height: 10px; cursor: row-resize; }
+  .split-handle::before { width: 40px; height: 4px; }
+  body.is-lab-open .lab-pane { border-left: 0; border-top: 1px solid var(--c-line); }
+  .lab-pane__note { display: none; }
+  .deck { margin: var(--sp-2); }
+  .deck-bar { height: 48px; padding: 0 var(--sp-2); }
+}

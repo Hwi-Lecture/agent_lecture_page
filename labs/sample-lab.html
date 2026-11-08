@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>질문에 자료를 넣기</title>
+  <style>
+    :root { font: 14px/1.55 system-ui, sans-serif; color: #202747; background: #f7f8fc; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 1rem; }
+    h1 { margin: 0; font-size: 1.1rem; }
+    p { margin: .35rem 0 .8rem; color: #58617b; }
+    label { display: block; margin: .75rem 0 .35rem; font-weight: 700; font-size: .85rem; }
+    select, textarea, button { width: 100%; padding: .65rem; border: 1px solid #d7dced; border-radius: .6rem; background: #fff; color: inherit; font: inherit; }
+    textarea { resize: vertical; min-height: 4.4rem; }
+    #prompt { min-height: 9rem; font-size: .83rem; }
+    button { border-color: #4354c8; background: #4354c8; color: #fff; font-weight: 700; cursor: pointer; }
+    button:hover { background: #3443ad; }
+    .actions { display: grid; grid-template-columns: 1fr 1fr; gap: .55rem; margin-top: .65rem; }
+    .actions button + button { background: #fff; color: #3548b8; }
+    .source { margin: .65rem 0; font-size: .8rem; }
+    a { color: #3548b8; }
+    .note { margin-top: .8rem; font-size: .78rem; }
+    .status { min-height: 1.4em; margin: .3rem 0 0; font-size: .8rem; }
+    @media (max-width: 400px) { body { padding: .75rem; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>질문에 실제 자료 넣기</h1>
+    <p>자료를 고르고 질문을 적어 프롬프트를 만드세요.</p>
+
+    <label for="record">참고 자료</label>
+    <select id="record">
+      <option value="none">자료 없이 질문하기</option>
+      <option value="startup">10/12 · 창업 지원 AI 솔루션</option>
+      <option value="security" selected>10/28 · 신안보 기업 풀</option>
+      <option value="manufacturing">10/29 · 중소제조 피지컬 AI 확산 전략</option>
+    </select>
+
+    <label for="question">질문</label>
+    <textarea id="question">신안보 분야 기업 풀은 몇 개사이며, 분야 중복은 어떻게 처리했나요?</textarea>
+
+    <div class="actions">
+      <button id="build" type="button">프롬프트 만들기</button>
+      <button id="copy" type="button">복사</button>
+    </div>
+    <p id="source" class="source"></p>
+
+    <label for="prompt">완성된 프롬프트</label>
+    <textarea id="prompt" readonly placeholder="프롬프트 만들기를 누르면 여기에 표시됩니다."></textarea>
+    <p id="status" class="status" role="status" aria-live="polite"></p>
+    <p class="note">이 화면은 프롬프트 조립 예시입니다. 외부 AI에 연결하지 않았습니다. 복사한 프롬프트를 실제 모델에 붙여 넣고 답변을 원문과 비교하세요.</p>
+  </main>
+
+  <script>
+    const records = {
+      none: { date: "", question: "신안보 분야 기업 풀은 몇 개사이며, 분야 중복은 어떻게 처리했나요?", text: "", url: "" },
+      startup: {
+        date: "2026-10-12", title: "유망 아이디어를 창업으로, 2차 ‘모두의 창업’ AI 솔루션 선정", question: "선정된 AI 솔루션 공급기업 수와 솔루션 수는 각각 얼마인가요?",
+        text: "중소벤처기업부는 2차 모두의 창업 프로젝트에서 AI 솔루션 공급기업 50개사의 103개 솔루션을 선정했다고 발표했다.",
+        url: "https://www.korea.kr/briefing/pressReleaseView.do?newsId=156784789"
+      },
+      security: {
+        date: "2026-10-28", title: "K-팔란티어, 신안보 혁신기업 육성 본격화…전략분야 선정계획 및 펀드 조성방안 등 논의", question: "신안보 분야 기업 풀은 몇 개사이며, 분야 중복은 어떻게 처리했나요?",
+        text: "중소벤처기업부는 1차 신안보 분야 기업 풀을 538개사로 집계했다. 분야별 합계에서 중복된 기업 47개사를 제외한 수치라고 밝혔다.",
+        url: "https://www.korea.kr/briefing/pressReleaseView.do?newsId=156786875"
+      },
+      manufacturing: {
+        date: "2026-10-29", title: "중소 제조현장을 피지컬 AI 혁신의 무대로, 「중소제조 피지컬 AI 확산 전략」 발표", question: "중소제조 피지컬 AI 확산 전략에서 2030년까지 투입할 계획 금액은 얼마인가요?",
+        text: "중소벤처기업부는 중소제조 피지컬 AI 확산 전략을 발표하며 2030년까지 스마트제조혁신에 5조 원 이상을 투입할 계획이라고 밝혔다.",
+        url: "https://www.korea.kr/briefing/pressReleaseView.do?newsId=156787119"
+      }
+    };
+    const recordInput = document.querySelector("#record");
+    const questionInput = document.querySelector("#question");
+    const promptOutput = document.querySelector("#prompt");
+    const sourceLine = document.querySelector("#source");
+    const status = document.querySelector("#status");
+
+    function updateRecord() {
+      const record = records[recordInput.value];
+      questionInput.value = record.question;
+      sourceLine.replaceChildren();
+      if (record.url) {
+        sourceLine.append(document.createTextNode(`${record.date} · `));
+        const link = document.createElement("a");
+        link.href = record.url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = "정책브리핑 원문 열기 ↗";
+        sourceLine.append(link);
+      } else {
+        sourceLine.textContent = "자료를 제공하지 않는 기준선 질문입니다.";
+      }
+      promptOutput.value = "";
+      status.textContent = "";
+    }
+
+    document.querySelector("#build").addEventListener("click", () => {
+      const record = records[recordInput.value];
+      const question = questionInput.value.trim();
+      if (!question) { status.textContent = "질문을 입력해 주세요."; return; }
+      if (!record.text) {
+        promptOutput.value = question;
+        status.textContent = "질문만 준비했습니다. 실제 모델에 입력해 기준선을 확인하세요.";
+        return;
+      }
+      const parts = [
+        "너는 정책자료에 근거해 답하는 안내 도우미다.",
+        "제공된 자료에서 답을 찾고, 찾을 수 없으면 모른다고 말한다. 답 끝에 자료 제목, 기관, 날짜를 표시한다."
+      ];
+      parts.push(`\n[참고 자료]\n제목: ${record.title}\n기관: 중소벤처기업부\n날짜: ${record.date}\n요약: ${record.text}\n출처: ${record.url}`);
+      parts.push(`\n[질문]\n${question}`);
+      promptOutput.value = parts.join("\n\n");
+      status.textContent = "프롬프트를 만들었습니다. 복사해 실제 모델에서 확인하세요.";
+    });
+
+    document.querySelector("#copy").addEventListener("click", async () => {
+      if (!promptOutput.value) {
+        status.textContent = "먼저 프롬프트 만들기를 눌러 주세요.";
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(promptOutput.value);
+        status.textContent = "프롬프트를 복사했습니다.";
+      } catch (_) {
+        promptOutput.focus();
+        promptOutput.select();
+        status.textContent = "자동 복사가 막혔습니다. 선택된 내용을 직접 복사해 주세요.";
+      }
+    });
+
+    recordInput.addEventListener("change", updateRecord);
+    updateRecord();
+  </script>
+</body>
+</html>

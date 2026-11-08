@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>단원 — 지식기반 에이전트 구축</title>
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/unit.css">
+  <link rel="stylesheet" href="assets/css/deck.css">
+  <link rel="stylesheet" href="assets/css/editor.css">
+  <link rel="stylesheet" href="assets/css/canvas.css">
+</head>
+<!-- 상태는 body에서 제어 (PLAN.md 10절)
+     data-view="post|slides"  ·  클래스 is-lab-open / is-editing / is-toc-open -->
+<body data-page="unit" data-view="post">
+
+  <header class="unit-header">
+    <a class="btn btn--ghost btn--sm unit-header__back" href="index.html">← 목록</a>
+    <div class="unit-header__title">
+      <span id="unit-no" class="unit-header__no">01</span>
+      <h1 id="unit-title">단원 제목</h1>
+      <span id="draft-badge" class="badge badge--draft is-hidden">초안</span>
+    </div>
+
+    <div class="view-tabs" role="tablist" aria-label="보기 전환">
+      <button class="view-tab is-active" role="tab" aria-selected="true"  data-view-tab="post">글</button>
+      <button class="view-tab"           role="tab" aria-selected="false" data-view-tab="slides">슬라이드</button>
+    </div>
+
+    <div class="unit-header__actions">
+      <button id="toc-btn" class="btn btn--ghost btn--icon" aria-label="목차" aria-expanded="false" aria-controls="slide-toc">☰</button>
+      <button id="fullscreen-btn" class="btn btn--ghost btn--icon only-slides" aria-label="전체화면">⛶</button>
+      <button id="edit-btn" class="btn btn--sm is-hidden" aria-pressed="false">✎ 편집</button>
+    </div>
+  </header>
+
+  <div class="unit-layout">
+    <!-- 편집기: body.is-editing 일 때 왼쪽에 나타나고, 오른쪽 화면이 미리보기가 된다 -->
+    <aside id="editor" class="editor" aria-label="편집기">
+      <div class="editor__bar">
+        <span id="editor-file" class="editor__file">content/u01/post.md</span>
+        <span id="editor-status" class="editor__status" data-state="saved">저장됨</span>
+        <div class="editor__actions">
+          <button id="editor-cancel" class="btn btn--sm btn--ghost">닫기</button>
+          <button id="editor-save" class="btn btn--sm btn--primary">저장</button>
+        </div>
+      </div>
+      <!-- 삽입 도구 모음 (PLAN.md 12-3). .tool--both 는 글 편집에서도 표시 -->
+      <div id="editor-tools" class="editor-tools" role="toolbar" aria-label="삽입 도구">
+        <label class="tool-select only-slides">
+          <span class="sr-only">레이아웃</span>
+          <select id="tool-layout" aria-label="현재 장 레이아웃">
+            <option value="default">기본</option>
+            <option value="title">표지</option>
+            <option value="section">구간 제목</option>
+            <option value="two-col">2단</option>
+            <option value="figure">그림 중심</option>
+          </select>
+        </label>
+        <span class="tool-sep only-slides" aria-hidden="true"></span>
+        <div class="tool-group only-slides" aria-label="도형">
+          <button class="tool" data-insert="rect" title="사각형"><svg viewBox="0 0 20 20"><rect x="3" y="5" width="14" height="10" rx="2"/></svg></button>
+          <button class="tool" data-insert="ellipse" title="원"><svg viewBox="0 0 20 20"><ellipse cx="10" cy="10" rx="7" ry="5.5"/></svg></button>
+          <button class="tool" data-insert="arrow" title="화살표"><svg viewBox="0 0 20 20"><path d="M3 10h12M11 6l4 4-4 4"/></svg></button>
+          <button class="tool" data-insert="text" title="글상자"><svg viewBox="0 0 20 20"><path d="M5 5h10M10 5v10"/></svg></button>
+        </div>
+        <button class="tool tool--both tool--label" data-insert="image" title="이미지 (끌어다 놓기도 가능)">
+          <svg viewBox="0 0 20 20"><rect x="3" y="4" width="14" height="12" rx="2"/><circle cx="8" cy="8.5" r="1.5"/><path d="M4 15l4-4 3 3 2-2 3 3"/></svg><span>이미지</span>
+        </button>
+        <span class="tool-sep" aria-hidden="true"></span>
+        <div class="tool-group">
+          <button class="tool tool--text only-slides" data-snippet="slide" title="새 슬라이드">+장</button>
+          <button class="tool tool--text only-slides" data-snippet="two-col" title="2단 구분 |||">2단</button>
+          <button class="tool tool--text tool--both" data-snippet="table" title="표">표</button>
+          <button class="tool tool--text tool--both" data-snippet="callout" title="콜아웃">메모</button>
+          <button class="tool tool--text only-slides" data-snippet="lab" title="실습 연결">실습</button>
+        </div>
+        <input id="image-input" type="file" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml" hidden>
+      </div>
+      <textarea id="editor-input" class="editor__input" spellcheck="false" aria-label="Markdown 원문"></textarea>
+      <div class="editor__hint">슬라이드 구분 <code>---</code> · 2단 <code>|||</code> · 도형은 오른쪽 슬라이드에서 끌어 조정 · 더블클릭 글자 수정 · Del 삭제 · Ctrl+S 저장</div>
+      <div class="drop-hint" aria-hidden="true">이미지를 놓으면 업로드돼요</div>
+    </aside>
+
+    <main id="unit-main" class="unit-main">
+      <!-- 로딩/오류 안내: data-state="loading|error", 내용은 #unit-state-text -->
+      <div id="unit-state" class="state-msg is-hidden" data-state="loading">
+        <span class="state-msg__spinner" aria-hidden="true"></span>
+        <p id="unit-state-text">불러오는 중…</p>
+      </div>
+
+      <!-- ===== 글 보기 ===== -->
+      <section id="post-view" class="post-view only-post" aria-label="본문">
+        <nav class="post-toc" aria-label="글 목차">
+          <p class="post-toc__label">이 글의 목차</p>
+          <ol id="post-toc"><!-- <li class="post-toc__h2|h3"><a href="#id">..</a></li>, 현재 위치 a.is-active --></ol>
+        </nav>
+        <article id="post-body" class="prose"><!-- post.md 렌더 결과 --></article>
+      </section>
+
+      <!-- ===== 슬라이드 보기 ===== -->
+      <!-- 분할 비율: #deck-view 에 style="--split: .55" (슬라이드 쪽 비율, .25~.75) -->
+      <section id="deck-view" class="deck-view only-slides" aria-label="슬라이드">
+        <div class="deck-pane">
+          <div id="deck" class="deck" aria-live="polite">
+            <!-- 렌더 형식:
+                 <section class="slide slide--{layout}" data-title=".." data-lab=".." aria-hidden="true|false">
+                   <div class="slide__body"> ... </div>
+                 </section>
+                 현재 장만 .is-active. two-col은 .slide__body 안에 .slide__col 두 개
+                 자유 배치 층: .slide__body 뒤에 <div class="slide__canvas"> (PLAN.md 12-2) -->
+          </div>
+
+          <!-- 시각 편집용 (편집 중 슬라이드 보기에서만). #cv-selection 은 JS가 현재 장 .slide__canvas 안으로 옮겨 씀
+               (#deck 재렌더 시 지워지므로 참조를 들고 있다가 다시 붙일 것) -->
+          <div class="cv-parking" hidden>
+            <div id="cv-selection" class="cv-selection is-hidden" data-kind="box">
+              <span class="cv-handle" data-handle="nw"></span><span class="cv-handle" data-handle="n"></span>
+              <span class="cv-handle" data-handle="ne"></span><span class="cv-handle" data-handle="e"></span>
+              <span class="cv-handle" data-handle="se"></span><span class="cv-handle" data-handle="s"></span>
+              <span class="cv-handle" data-handle="sw"></span><span class="cv-handle" data-handle="w"></span>
+              <span class="cv-handle cv-handle--point" data-handle="start"></span>
+              <span class="cv-handle cv-handle--point" data-handle="end"></span>
+            </div>
+          </div>
+          <div id="cv-props" class="cv-props is-hidden" role="toolbar" aria-label="선택한 도형 속성">
+            <div class="cv-props__group" aria-label="색">
+              <button class="swatch" data-prop="color" data-value="primary" style="--sw: var(--c-primary)" title="남색"></button>
+              <button class="swatch" data-prop="color" data-value="node"    style="--sw: var(--c-node)"    title="청록"></button>
+              <button class="swatch" data-prop="color" data-value="edge"    style="--sw: var(--c-edge)"    title="호박"></button>
+              <button class="swatch" data-prop="color" data-value="danger"  style="--sw: var(--c-danger)"  title="빨강"></button>
+              <button class="swatch" data-prop="color" data-value="ink"     style="--sw: var(--c-ink)"     title="검정"></button>
+              <button class="swatch" data-prop="color" data-value="muted"   style="--sw: var(--c-ink-3)"   title="회색"></button>
+            </div>
+            <span class="tool-sep" aria-hidden="true"></span>
+            <div class="cv-props__group" aria-label="채우기">
+              <button class="tool tool--text" data-prop="style" data-value="fill">채움</button>
+              <button class="tool tool--text" data-prop="style" data-value="soft">연하게</button>
+              <button class="tool tool--text" data-prop="style" data-value="outline">테두리</button>
+            </div>
+            <span class="tool-sep" aria-hidden="true"></span>
+            <div class="cv-props__group">
+              <button class="tool tool--text" data-action="size-down" title="글자 작게">가−</button>
+              <button class="tool tool--text" data-action="size-up"   title="글자 크게">가+</button>
+              <button class="tool tool--text" data-action="backward"  title="뒤로 보내기">뒤로</button>
+              <button class="tool tool--text" data-action="forward"   title="앞으로 가져오기">앞으로</button>
+              <button class="tool tool--text" data-action="duplicate" title="복제 (Ctrl+D)">복제</button>
+              <button class="tool tool--text tool--danger" data-action="delete" title="삭제 (Del)">삭제</button>
+            </div>
+          </div>
+          <div class="deck-bar">
+            <button id="prev-btn" class="btn btn--icon btn--ghost" aria-label="이전 슬라이드">◀</button>
+            <span class="deck-bar__count"><span id="slide-current">1</span> / <span id="slide-total">1</span></span>
+            <button id="next-btn" class="btn btn--icon btn--ghost" aria-label="다음 슬라이드">▶</button>
+            <div id="slide-progress" class="progress deck-bar__progress" style="--progress: 0"></div>
+            <button id="lab-btn" class="btn btn--sm lab-btn is-hidden">🧪 실습 열기</button>
+          </div>
+        </div>
+
+        <div id="split-handle" class="split-handle" role="separator" tabindex="0"
+             aria-orientation="vertical" aria-label="슬라이드·실습 크기 조절"
+             aria-valuemin="25" aria-valuemax="75" aria-valuenow="55"></div>
+
+        <aside id="lab-pane" class="lab-pane" aria-label="실습">
+          <div class="lab-pane__bar">
+            <span class="badge badge--lab">🧪 실습</span>
+            <strong id="lab-title" class="lab-pane__title">실습 제목</strong>
+            <span class="lab-pane__note">닫으면 실습 내용이 초기화될 수 있어요</span>
+            <button id="lab-close-btn" class="btn btn--sm btn--ghost">닫기 ✕</button>
+          </div>
+          <iframe id="lab-frame" class="lab-pane__frame" title="실습"></iframe>
+        </aside>
+      </section>
+    </main>
+
+    <!-- 슬라이드 목차 서랍: body.is-toc-open -->
+    <aside id="slide-toc" class="slide-toc" aria-label="슬라이드 목차">
+      <div class="slide-toc__head">
+        <strong>슬라이드 목차</strong>
+        <button id="toc-close-btn" class="btn btn--icon btn--ghost btn--sm" aria-label="목차 닫기">✕</button>
+      </div>
+      <ol id="slide-toc-list" class="slide-toc__list">
+        <!-- <li><button data-slide="3" class="is-active"><span class="slide-toc__no">3</span>제목<span class="slide-toc__lab">🧪</span></button></li> -->
+      </ol>
+    </aside>
+    <div class="scrim" data-close="toc" aria-hidden="true"></div>
+  </div>
+
+  <script src="assets/js/course.js" defer></script>
+  <script src="assets/js/vendor/marked.umd.js" defer></script>
+  <script src="assets/js/canvas.js" defer></script>
+  <script src="assets/js/markdown.js" defer></script>
+  <script src="assets/js/deck.js" defer></script>
+  <script src="assets/js/unit.js" defer></script>
+  <script src="assets/js/editor.js" defer></script>
+</body>
+</html>

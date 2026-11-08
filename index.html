@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>지식기반 에이전트 구축</title>
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/home.css">
+</head>
+<body data-page="home">
+
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="index.html">
+        <svg class="brand__mark" viewBox="0 0 28 28" aria-hidden="true">
+          <line x1="7" y1="8" x2="21" y2="8" stroke="currentColor" stroke-opacity=".3" stroke-width="2"/>
+          <line x1="7" y1="8" x2="14" y2="21" stroke="currentColor" stroke-opacity=".3" stroke-width="2"/>
+          <line x1="21" y1="8" x2="14" y2="21" stroke="currentColor" stroke-opacity=".3" stroke-width="2"/>
+          <circle cx="7" cy="8" r="4" fill="#3b4cca"/>
+          <circle cx="21" cy="8" r="4" fill="#14a38b"/>
+          <circle cx="14" cy="21" r="4" fill="#e09b2d"/>
+        </svg>
+        <span>지식기반 에이전트 구축</span>
+      </a>
+      <div class="site-header__spacer"></div>
+      <div class="header-progress" aria-label="전체 진도">
+        <span>진도 <strong id="total-progress">0%</strong></span>
+        <div id="total-progress-bar" class="progress" style="--progress: 0"></div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- 표지: 왼쪽 강의 정보 / 오른쪽 에이전트 구성도 -->
+    <section class="hero">
+      <div class="container hero__grid">
+        <div class="hero__inner">
+          <span class="hero__eyebrow">KNOWLEDGE-BASED AGENT</span>
+          <h1 id="course-title" class="hero__title">지식기반 에이전트 구축</h1>
+          <p id="course-desc" class="hero__desc">지식 소스를 연결해 질의응답과 업무를 수행하는 에이전트의 구성 요소와 구축 절차를 다룹니다.</p>
+
+          <dl class="hero__meta">
+            <div><dt>다루는 내용</dt><dd>지식 수집·구조화, 검색, 추론·계획, 도구 연동, 평가</dd></div>
+            <div><dt>자료 형식</dt><dd>단원별 본문 · 슬라이드 · 실습</dd></div>
+            <div><dt>구성</dt><dd id="hero-unit-count">단원 구성 준비 중</dd></div>
+          </dl>
+
+          <div class="hero__actions">
+            <a id="continue-btn" class="btn btn--primary is-hidden" href="#">이어서 보기 →</a>
+            <a class="btn" href="#units">단원 목록</a>
+          </div>
+        </div>
+
+        <figure class="hero__figure" aria-label="지식기반 에이전트 구성도">
+          <svg class="arch" viewBox="0 0 440 340" role="img" aria-labelledby="arch-title">
+            <title id="arch-title">사용자 요청이 에이전트를 거쳐 지식베이스·도구·메모리와 연결되는 구성</title>
+            <defs>
+              <marker id="arch-head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0 0 L10 5 L0 10 z" class="arch__head"/>
+              </marker>
+            </defs>
+            <!-- 연결선 -->
+            <path class="arch__line" d="M220 62 V112" marker-end="url(#arch-head)"/>
+            <path class="arch__line" d="M220 178 V218" marker-end="url(#arch-head)" marker-start="url(#arch-head)"/>
+            <path class="arch__line" d="M170 160 C110 180 80 200 80 218" marker-end="url(#arch-head)" marker-start="url(#arch-head)"/>
+            <path class="arch__line" d="M270 160 C330 180 360 200 360 218" marker-end="url(#arch-head)" marker-start="url(#arch-head)"/>
+            <path class="arch__line arch__line--dash" d="M80 282 C80 312 360 312 360 282"/>
+
+            <!-- 사용자 요청 -->
+            <rect class="arch__box arch__box--muted" x="150" y="18" width="140" height="44" rx="22"/>
+            <text class="arch__label" x="220" y="45">사용자 요청</text>
+
+            <!-- 에이전트 -->
+            <rect class="arch__box arch__box--primary" x="130" y="112" width="180" height="66" rx="14"/>
+            <text class="arch__label arch__label--strong" x="220" y="140">에이전트</text>
+            <text class="arch__sub arch__sub--inv" x="220" y="161">LLM · 추론 · 계획</text>
+
+            <!-- 하단 3요소 -->
+            <rect class="arch__box arch__box--node" x="20" y="218" width="120" height="64" rx="12"/>
+            <text class="arch__label" x="80" y="245">지식베이스</text>
+            <text class="arch__sub" x="80" y="265">문서 · 그래프 · DB</text>
+
+            <rect class="arch__box arch__box--edge" x="160" y="218" width="120" height="64" rx="12"/>
+            <text class="arch__label" x="220" y="245">도구</text>
+            <text class="arch__sub" x="220" y="265">검색 · API · 실행</text>
+
+            <rect class="arch__box arch__box--primary-soft" x="300" y="218" width="120" height="64" rx="12"/>
+            <text class="arch__label" x="360" y="245">메모리</text>
+            <text class="arch__sub" x="360" y="265">대화 · 작업 이력</text>
+          </svg>
+          <figcaption>지식기반 에이전트 구성 요소</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="units" class="units">
+      <div class="container">
+        <div class="section-head">
+          <h2>단원</h2>
+          <span class="section-head__meta" id="unit-count"></span>
+        </div>
+
+        <!-- home.js가 course.js 데이터로 카드를 렌더한다. [data-placeholder] 카드는 디자인 확인용 샘플이며 렌더 시 제거 -->
+        <div id="unit-grid" class="unit-grid">
+          <a class="unit-card is-draft" href="unit.html?u=u01" data-placeholder style="--progress: 0">
+            <div class="unit-card__top">
+              <span class="unit-card__no">01</span>
+              <span class="unit-card__badges">
+                <span class="badge badge--lab">🧪 실습</span>
+                <span class="badge badge--draft">초안</span>
+                <span class="badge badge--lock">준비 중</span>
+              </span>
+            </div>
+            <h3 class="unit-card__title">단원 1 — 작성 예시</h3>
+            <p class="unit-card__summary">단원 내용과 슬라이드의 작성 형식을 확인합니다.</p>
+            <div class="unit-card__foot">
+              <div class="progress"></div>
+              <div class="unit-card__meta"><span>슬라이드 3장</span><span>시작 전</span></div>
+            </div>
+          </a>
+          <a class="unit-card" href="unit.html?u=u02" data-placeholder style="--progress: 0">
+            <div class="unit-card__top">
+              <span class="unit-card__no">02</span>
+              <span class="unit-card__badges">
+                <span class="badge badge--draft">초안</span>
+                <span class="badge badge--lock">준비 중</span>
+              </span>
+            </div>
+            <h3 class="unit-card__title">단원 2 — 준비 중</h3>
+            <p class="unit-card__summary">단원 구성은 추후 정합니다.</p>
+            <div class="unit-card__foot">
+              <div class="progress"></div>
+              <div class="unit-card__meta"><span>슬라이드 준비 중</span><span>시작 전</span></div>
+            </div>
+          </a>
+          <a class="unit-card is-locked" href="#" data-placeholder aria-disabled="true">
+            <div class="unit-card__top">
+              <span class="unit-card__no">03</span>
+              <span class="unit-card__badges">
+                <span class="badge badge--draft">초안</span>
+                <span class="badge badge--lock">🔒 준비 중</span>
+              </span>
+            </div>
+            <h3 class="unit-card__title">단원 3 — 준비 중</h3>
+            <p class="unit-card__summary">단원 구성은 추후 정합니다.</p>
+            <div class="unit-card__foot">
+              <div class="progress"></div>
+              <div class="unit-card__meta"><span>-</span><span>-</span></div>
+            </div>
+          </a>
+        </div>
+
+        <template id="tpl-unit-card">
+          <a class="unit-card" href="#">
+            <div class="unit-card__top">
+              <span class="unit-card__no" data-slot="no"></span>
+              <span class="unit-card__badges">
+                <span class="badge badge--lab" data-slot="lab">🧪 실습</span>
+                <span class="badge badge--draft">초안</span>
+                <span class="badge badge--lock" data-slot="status">🔒 준비 중</span>
+              </span>
+            </div>
+            <h3 class="unit-card__title" data-slot="title"></h3>
+            <p class="unit-card__summary" data-slot="summary"></p>
+            <div class="unit-card__foot">
+              <div class="progress"></div>
+              <div class="unit-card__meta"><span data-slot="slides"></span><span data-slot="progress-text"></span></div>
+            </div>
+          </a>
+        </template>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">© 지식기반 에이전트 구축 강의</div>
+  </footer>
+
+  <script src="assets/js/course.js" defer></script>
+  <script src="assets/js/home.js" defer></script>
+</body>
+</html>

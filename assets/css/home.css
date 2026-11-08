@@ -1,0 +1,115 @@
+/* =========================================================
+   home.css — 메인 페이지 (담당: Claude)
+   ========================================================= */
+
+/* ---------- 헤더 진도 ---------- */
+.header-progress { display: flex; align-items: center; gap: var(--sp-3); font-size: var(--fs-sm); color: var(--c-ink-2); }
+.header-progress .progress { width: 120px; }
+
+/* ---------- 히어로 ---------- */
+.hero {
+  position: relative; overflow: hidden; padding: var(--sp-8) 0 var(--sp-7);
+  border-bottom: 1px solid var(--c-line);
+  background:
+    radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--c-ink-3) 28%, transparent) 1px, transparent 0) 0 0 / 22px 22px,
+    linear-gradient(180deg, var(--c-surface) 0%, var(--c-bg) 100%);
+}
+.hero__grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); align-items: center; gap: var(--sp-7); }
+.hero__inner { position: relative; }
+
+/* 강의 정보 */
+.hero__meta { margin: var(--sp-6) 0 0; display: grid; gap: var(--sp-2); }
+.hero__meta > div { display: grid; grid-template-columns: 96px 1fr; gap: var(--sp-3); padding: var(--sp-2) 0; border-top: 1px solid var(--c-line); }
+.hero__meta > div:last-child { border-bottom: 1px solid var(--c-line); }
+.hero__meta dt { font-size: var(--fs-sm); font-weight: 700; color: var(--c-ink-3); }
+.hero__meta dd { margin: 0; font-size: var(--fs-sm); color: var(--c-ink); }
+
+/* 구성도 */
+.hero__figure {
+  margin: 0; padding: var(--sp-5); border: 1px solid var(--c-line); border-radius: var(--radius-lg);
+  background: var(--c-surface); box-shadow: var(--shadow);
+}
+.hero__figure figcaption { margin-top: var(--sp-3); text-align: center; font-size: var(--fs-xs); color: var(--c-ink-3); }
+.arch { width: 100%; height: auto; font-family: var(--font-sans); }
+.arch__line { fill: none; stroke: var(--c-ink-3); stroke-width: 1.6; }
+.arch__line--dash { stroke-dasharray: 4 5; opacity: .6; }
+.arch__head { fill: var(--c-ink-3); }
+.arch__box { stroke-width: 1.5; }
+.arch__box--muted        { fill: var(--c-surface-2); stroke: var(--c-line); }
+.arch__box--primary      { fill: var(--c-primary); stroke: var(--c-primary); }
+.arch__box--primary-soft { fill: var(--c-primary-2); stroke: color-mix(in srgb, var(--c-primary) 35%, transparent); }
+.arch__box--node         { fill: var(--c-node-2); stroke: color-mix(in srgb, var(--c-node) 40%, transparent); }
+.arch__box--edge         { fill: var(--c-edge-2); stroke: color-mix(in srgb, var(--c-edge) 45%, transparent); }
+.arch__label { text-anchor: middle; font-size: 14px; font-weight: 700; fill: var(--c-ink); }
+.arch__label--strong { font-size: 17px; fill: #fff; }
+.arch__sub { text-anchor: middle; font-size: 11px; fill: var(--c-ink-2); }
+.arch__sub--inv { fill: rgba(255,255,255,.8); }
+.hero__eyebrow {
+  display: inline-block; margin-bottom: var(--sp-3); font-size: var(--fs-sm); font-weight: 700;
+  color: var(--c-node); letter-spacing: .04em;
+}
+.hero__title { font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; letter-spacing: -.02em; }
+.hero__desc { margin-top: var(--sp-4); font-size: var(--fs-lg); color: var(--c-ink-2); }
+.hero__actions { margin-top: var(--sp-6); display: flex; gap: var(--sp-3); flex-wrap: wrap; }
+.hero__actions .btn { height: 48px; padding: 0 var(--sp-5); font-size: var(--fs-md); }
+
+/* ---------- 단원 섹션 ---------- */
+.units { padding: var(--sp-6) 0 var(--sp-8); }
+.section-head { display: flex; align-items: baseline; gap: var(--sp-3); margin-bottom: var(--sp-5); }
+.section-head h2 { font-size: var(--fs-xl); }
+.section-head__meta { color: var(--c-ink-3); font-size: var(--fs-sm); }
+
+.unit-grid {
+  display: grid; gap: var(--sp-5);
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  list-style: none; margin: 0; padding: 0;
+}
+
+/* ---------- 단원 카드 ---------- */
+.unit-card {
+  position: relative; display: flex; flex-direction: column; gap: var(--sp-3);
+  min-height: 230px; padding: var(--sp-5);
+  background: var(--c-surface); border: 1px solid var(--c-line); border-radius: var(--radius-lg);
+  color: var(--c-ink); box-shadow: var(--shadow-sm);
+  transition: transform .2s var(--ease), box-shadow .2s var(--ease), border-color .2s;
+}
+.unit-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: var(--c-primary); }
+.unit-card__top { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); }
+.unit-card__no {
+  font-size: var(--fs-2xl); font-weight: 800; line-height: 1; letter-spacing: -.03em;
+  color: var(--c-primary); font-variant-numeric: tabular-nums;
+}
+.unit-card__badges { display: flex; gap: var(--sp-1); flex-wrap: wrap; justify-content: flex-end; }
+.unit-card__title { font-size: var(--fs-lg); font-weight: 700; }
+.unit-card__summary {
+  color: var(--c-ink-2); font-size: var(--fs-sm);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.unit-card__foot { margin-top: auto; display: grid; gap: var(--sp-2); }
+.unit-card__meta { display: flex; justify-content: space-between; font-size: var(--fs-xs); color: var(--c-ink-3); }
+
+/* 상태 */
+.unit-card .badge--draft, .unit-card .badge--lock { display: none; }
+.unit-card.is-draft .badge--draft { display: inline-flex; }
+.unit-card.is-locked { pointer-events: none; background: var(--c-surface-2); box-shadow: none; border-style: dashed; }
+.unit-card.is-locked .unit-card__no,
+.unit-card.is-locked .unit-card__title { color: var(--c-ink-3); }
+.unit-card.is-locked .badge--lock { display: inline-flex; }
+.unit-card.is-locked .unit-card__foot { visibility: hidden; }
+
+/* 샘플(placeholder) 카드 표시 — JS 렌더 전 디자인 확인용 */
+.unit-card[data-placeholder] { outline: 0; }
+
+/* ---------- 푸터 ---------- */
+.site-footer { border-top: 1px solid var(--c-line); padding: var(--sp-5) 0; color: var(--c-ink-3); font-size: var(--fs-sm); }
+
+/* ---------- 반응형 ---------- */
+@media (max-width: 960px) {
+  .hero__grid { grid-template-columns: 1fr; gap: var(--sp-6); }
+  .hero__figure { max-width: 560px; }
+}
+@media (max-width: 720px) {
+  .hero { padding: var(--sp-7) 0 var(--sp-5); }
+  .hero__meta > div { grid-template-columns: 80px 1fr; }
+  .header-progress .progress { display: none; }
+}

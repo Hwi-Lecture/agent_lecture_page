@@ -1,0 +1,123 @@
+/* =========================================================
+   canvas.css — 슬라이드 자유 배치 층 + 시각 편집 UI (담당: Claude)
+   형식은 PLAN.md 12절. 좌표 변수는 단위 없는 숫자:
+   --x/--w = 슬라이드 폭 %, --y/--h = 슬라이드 높이 %, --size/--len = cqi(슬라이드 폭 %)
+   ========================================================= */
+
+/* ---------- 자유 배치 층 ---------- */
+.slide__canvas { position: absolute; inset: 0; pointer-events: none; }
+
+.cv {
+  --cv-c: var(--c-primary);
+  position: absolute; box-sizing: border-box;
+  left: calc(var(--x, 0) * 1%); top: calc(var(--y, 0) * 1%);
+  width: calc(var(--w) * 1%); height: calc(var(--h) * 1%); /* --h 없으면 auto */
+}
+/* 색 */
+.cv--primary { --cv-c: var(--c-primary); }
+.cv--node    { --cv-c: var(--c-node); }
+.cv--edge    { --cv-c: var(--c-edge); }
+.cv--ink     { --cv-c: var(--c-ink); }
+.cv--muted   { --cv-c: var(--c-ink-3); }
+.cv--danger  { --cv-c: var(--c-danger); }
+
+/* 도형 공통 */
+.cv--rect, .cv--ellipse {
+  display: flex; align-items: center; justify-content: center;
+  border: .25cqi solid color-mix(in srgb, var(--cv-c) 45%, transparent);
+  background: color-mix(in srgb, var(--cv-c) 14%, var(--c-surface));
+  color: var(--cv-c);
+}
+.cv--rect    { border-radius: 1cqi; }
+.cv--ellipse { border-radius: 50%; }
+.cv--fill    { background: var(--cv-c); border-color: var(--cv-c); color: #fff; }
+.cv--outline { background: transparent; border: .3cqi solid var(--cv-c); }
+
+/* 글자 */
+.cv__text {
+  display: block; max-width: 100%; padding: .6cqi 1cqi;
+  font-size: calc(var(--size, 2) * 1cqi); font-weight: 700; line-height: 1.3;
+  text-align: center; white-space: pre-wrap; overflow-wrap: anywhere;
+}
+.cv--text { color: var(--cv-c); }
+.cv--text .cv__text { padding: 0; text-align: left; font-weight: 500; }
+
+/* 이미지 */
+.cv--image { object-fit: contain; border-radius: .6cqi; }
+
+/* 화살표: 시작점(--x,--y)에서 --angle 방향으로 --len 길이.
+   위아래 padding은 클릭 영역 확보용(배경은 content-box에만) */
+.cv--arrow {
+  width: calc(var(--len, 10) * 1cqi); height: calc(.4cqi + 2.4cqi);
+  padding: 1.2cqi 0; margin-top: -1.4cqi;
+  background: var(--cv-c); background-clip: content-box;
+  transform-origin: 0 50%; transform: rotate(calc(var(--angle, 0) * 1deg));
+}
+.cv--arrow.cv--dash {
+  background: repeating-linear-gradient(90deg, var(--cv-c) 0 1.4cqi, transparent 1.4cqi 2.4cqi) content-box;
+}
+.cv--head-end::after, .cv--head-both::after, .cv--head-both::before {
+  content: ""; position: absolute; top: 50%; width: 0; height: 0;
+  border-block: 1cqi solid transparent;
+}
+.cv--head-end::after, .cv--head-both::after { right: -.4cqi; border-left: 1.8cqi solid var(--cv-c); transform: translateY(-50%); }
+.cv--head-both::before { left: -.4cqi; border-right: 1.8cqi solid var(--cv-c); transform: translateY(-50%); }
+
+/* ---------- 편집 중 (슬라이드 보기) ---------- */
+body.is-editing[data-view="slides"] .cv { pointer-events: auto; cursor: move; user-select: none; -webkit-user-drag: none; }
+body.is-editing[data-view="slides"] .cv:hover { outline: 1.5px dashed var(--c-primary); outline-offset: 2px; }
+body.is-editing[data-view="slides"] .slide { transition: none; }
+body.is-editing[data-view="slides"] .slide.is-active { outline: 1px dashed var(--c-line); outline-offset: 4px; }
+.cv.is-text-editing { cursor: text; outline: 2px solid var(--c-node) !important; }
+.cv.is-text-editing .cv__text { outline: none; user-select: text; cursor: text; min-width: 2em; }
+
+/* ---------- 선택 상자 ---------- */
+.cv-selection {
+  position: absolute; z-index: 10; pointer-events: auto; cursor: move;
+  left: calc(var(--x, 0) * 1%); top: calc(var(--y, 0) * 1%);
+  width: calc(var(--w, 0) * 1%); height: calc(var(--h, 0) * 1%);
+  outline: 2px solid var(--c-primary); outline-offset: 1px;
+}
+.cv-handle {
+  position: absolute; width: 12px; height: 12px; transform: translate(-50%, -50%);
+  background: #fff; border: 2px solid var(--c-primary); border-radius: 3px; pointer-events: auto;
+}
+.cv-handle[data-handle="nw"] { left: 0;    top: 0;    cursor: nwse-resize; }
+.cv-handle[data-handle="n"]  { left: 50%;  top: 0;    cursor: ns-resize; }
+.cv-handle[data-handle="ne"] { left: 100%; top: 0;    cursor: nesw-resize; }
+.cv-handle[data-handle="e"]  { left: 100%; top: 50%;  cursor: ew-resize; }
+.cv-handle[data-handle="se"] { left: 100%; top: 100%; cursor: nwse-resize; }
+.cv-handle[data-handle="s"]  { left: 50%;  top: 100%; cursor: ns-resize; }
+.cv-handle[data-handle="sw"] { left: 0;    top: 100%; cursor: nesw-resize; }
+.cv-handle[data-handle="w"]  { left: 0;    top: 50%;  cursor: ew-resize; }
+.cv-handle--point { display: none; border-radius: 50%; cursor: crosshair; }
+
+/* 화살표 선택: 상자 대신 양 끝 점 손잡이 (좌표는 층 전체 기준) */
+.cv-selection[data-kind="arrow"] { inset: 0; width: auto; height: auto; outline: 0; pointer-events: none; }
+.cv-selection[data-kind="arrow"] .cv-handle:not(.cv-handle--point) { display: none; }
+.cv-selection[data-kind="arrow"] .cv-handle--point { display: block; }
+.cv-selection[data-kind="arrow"] [data-handle="start"] { left: calc(var(--x1) * 1%); top: calc(var(--y1) * 1%); }
+.cv-selection[data-kind="arrow"] [data-handle="end"]   { left: calc(var(--x2) * 1%); top: calc(var(--y2) * 1%); }
+/* 글상자·이미지 등 높이 자동 객체는 JS가 실측 --h 를 넣어줄 것 */
+
+/* ---------- 속성 막대 ---------- */
+.deck-pane { position: relative; }
+.cv-props {
+  position: absolute; z-index: 15; top: var(--sp-3); left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: var(--sp-1); max-width: calc(100% - var(--sp-4));
+  padding: var(--sp-1) var(--sp-2); overflow-x: auto;
+  background: var(--c-surface); border: 1px solid var(--c-line); border-radius: 999px; box-shadow: var(--shadow-lg);
+}
+.cv-props__group { display: flex; align-items: center; gap: 2px; }
+.swatch {
+  width: 22px; height: 22px; margin: 0 2px; padding: 0; border: 2px solid var(--c-surface); border-radius: 50%;
+  background: var(--sw); box-shadow: 0 0 0 1px var(--c-line); cursor: pointer;
+}
+.swatch.is-active { box-shadow: 0 0 0 2px var(--c-ink); }
+
+/* ---------- 이미지 끌어놓기 ---------- */
+.deck.is-dragover { outline: 3px dashed var(--c-node); outline-offset: -6px; border-radius: var(--radius); background: color-mix(in srgb, var(--c-node) 8%, transparent); }
+
+/* 편집 중이 아닐 땐 편집 UI 감춤 (JS 실수 대비 안전장치) */
+body:not(.is-editing) .cv-props,
+body:not(.is-editing) .cv-selection { display: none !important; }

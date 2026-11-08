@@ -1,0 +1,123 @@
+/* =========================================================
+   base.css — 디자인 토큰 + 공통 컴포넌트 (담당: Claude)
+   JS는 여기 정의된 클래스/변수만 토글한다 (PLAN.md 10절)
+   ========================================================= */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
+
+:root {
+  /* 색 — 잉크(남색) + 노드(청록) + 엣지(호박) : 지식 그래프 은유 */
+  --c-bg:        #f6f7fb;
+  --c-surface:   #ffffff;
+  --c-surface-2: #eef0f7;
+  --c-ink:       #1b2140;
+  --c-ink-2:     #4a5275;
+  --c-ink-3:     #8a90ab;
+  --c-line:      #dfe2ee;
+  --c-primary:   #3b4cca;
+  --c-primary-2: #e6e9ff;
+  --c-node:      #14a38b;
+  --c-node-2:    #dcf5ef;
+  --c-edge:      #e09b2d;
+  --c-edge-2:    #fdf0da;
+  --c-danger:    #d04545;
+
+  /* 타이포 */
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, "Segoe UI", "Malgun Gothic", sans-serif;
+  --font-mono: "JetBrains Mono", "D2Coding", Consolas, monospace;
+  --fs-xs: .75rem; --fs-sm: .875rem; --fs-md: 1rem; --fs-lg: 1.25rem;
+  --fs-xl: 1.75rem; --fs-2xl: 2.5rem;
+
+  /* 간격·형태 */
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 24px; --sp-6: 32px; --sp-7: 48px; --sp-8: 72px;
+  --radius-sm: 6px; --radius: 12px; --radius-lg: 20px;
+  --shadow-sm: 0 1px 2px rgba(27,33,64,.06);
+  --shadow:    0 4px 16px rgba(27,33,64,.08);
+  --shadow-lg: 0 12px 32px rgba(27,33,64,.14);
+  --header-h: 60px;
+  --content-w: 1120px;
+  --ease: cubic-bezier(.2,.7,.2,1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --c-bg: #10132a; --c-surface: #171b38; --c-surface-2: #1f2447;
+    --c-ink: #e8eaf6; --c-ink-2: #b4b9d6; --c-ink-3: #7d83a6; --c-line: #2b3160;
+    --c-primary: #7d8cff; --c-primary-2: #262d63;
+    --c-node: #3dd1b4; --c-node-2: #143a37; --c-edge: #f0b45a; --c-edge-2: #3d2f17;
+    --shadow: 0 4px 16px rgba(0,0,0,.35); --shadow-lg: 0 12px 32px rgba(0,0,0,.5);
+  }
+}
+
+/* ---------- 리셋 ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; font-family: var(--font-sans); font-size: var(--fs-md); line-height: 1.6;
+  color: var(--c-ink); background: var(--c-bg); word-break: keep-all;
+}
+img, svg, video { max-width: 100%; display: block; }
+a { color: var(--c-primary); text-decoration: none; }
+button { font: inherit; color: inherit; }
+h1, h2, h3, h4 { line-height: 1.3; margin: 0; letter-spacing: -.01em; }
+p { margin: 0; }
+:focus-visible { outline: 2px solid var(--c-primary); outline-offset: 2px; border-radius: 4px; }
+
+/* ---------- 상태 클래스 (JS 토글용) ---------- */
+.is-hidden { display: none !important; }
+.is-disabled { opacity: .4; pointer-events: none; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- 레이아웃 ---------- */
+.container { width: 100%; max-width: var(--content-w); margin: 0 auto; padding: 0 var(--sp-5); }
+
+/* ---------- 헤더 ---------- */
+.site-header {
+  position: sticky; top: 0; z-index: 50; height: var(--header-h);
+  background: color-mix(in srgb, var(--c-surface) 85%, transparent);
+  backdrop-filter: blur(10px); border-bottom: 1px solid var(--c-line);
+}
+.site-header__inner { height: 100%; display: flex; align-items: center; gap: var(--sp-4); }
+.brand { display: flex; align-items: center; gap: var(--sp-2); font-weight: 700; color: var(--c-ink); }
+.brand__mark { width: 28px; height: 28px; }
+.site-header__spacer { flex: 1; }
+
+/* ---------- 버튼 ---------- */
+.btn {
+  display: inline-flex; align-items: center; gap: var(--sp-2); height: 40px; padding: 0 var(--sp-4);
+  border: 1px solid var(--c-line); border-radius: 999px; background: var(--c-surface);
+  font-size: var(--fs-sm); font-weight: 600; cursor: pointer; white-space: nowrap;
+  transition: background .15s, border-color .15s, transform .15s var(--ease);
+}
+.btn:hover { border-color: var(--c-ink-3); }
+.btn:active { transform: translateY(1px); }
+.btn--primary { background: var(--c-primary); border-color: var(--c-primary); color: #fff; }
+.btn--primary:hover { filter: brightness(1.08); border-color: var(--c-primary); }
+.btn--ghost { background: transparent; border-color: transparent; }
+.btn--ghost:hover { background: var(--c-surface-2); }
+.btn--icon { width: 40px; padding: 0; justify-content: center; }
+.btn--sm { height: 32px; padding: 0 var(--sp-3); font-size: var(--fs-xs); }
+
+/* ---------- 배지 ---------- */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 var(--sp-2);
+  border-radius: 999px; font-size: var(--fs-xs); font-weight: 600;
+  background: var(--c-surface-2); color: var(--c-ink-2);
+}
+.badge--lab   { background: var(--c-node-2); color: var(--c-node); }
+.badge--draft { background: var(--c-edge-2); color: var(--c-edge); }
+.badge--lock  { background: var(--c-surface-2); color: var(--c-ink-3); }
+
+/* ---------- 진도 막대: 요소에 --progress(0~1) 지정 ---------- */
+/* --progress는 부모(카드 등)에서 상속받을 수 있도록 여기서 초기화하지 않는다 */
+.progress {
+  height: 6px; border-radius: 999px; background: var(--c-surface-2); overflow: hidden;
+}
+.progress::after {
+  content: ""; display: block; height: 100%; width: calc(var(--progress, 0) * 100%);
+  background: linear-gradient(90deg, var(--c-primary), var(--c-node)); border-radius: inherit;
+  transition: width .4s var(--ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
